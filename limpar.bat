@@ -1,15 +1,13 @@
 @echo off
 setlocal
 
-echo Limpando a pasta 'bin'...
-
 REM Verifica se a pasta bin existe
 if exist bin (
-    rd /s /q bin
-    echo Pasta 'bin' removida com sucesso.
+    REM Remove arquivos .class dentro da pasta bin e subpastas
+    del /s /q bin\*.class >nul 2>&1
+    echo Arquivos .class na pasta 'bin' removidos com sucesso.
 ) else (
-    echo Nenhuma pasta 'bin' encontrada.
+    echo Pasta 'bin' nao encontrada. Nada para limpar.
 )
 
-pause
 endlocal

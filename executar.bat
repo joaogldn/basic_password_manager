@@ -1,21 +1,19 @@
 @echo off
 setlocal
 
-echo Compilando arquivos Java...
-if not exist bin mkdir bin
-
-javac -cp "lib/*" -d bin src\*.java
-
-if %ERRORLEVEL% NEQ 0 (
-    echo Houve um erro na compilação.
+REM Verifica se a pasta bin existe
+if not exist bin (
+    echo Erro: Pasta "bin" nao encontrada. Compile o projeto primeiro.
     pause
-    exit /b
+    exit /b 1
 )
 
-echo.
-echo Iniciando a aplicação...
-java -cp "lib/*;bin" Principal
+REM Roda a aplicação a partir da pasta bin
+java -cp bin Principal
+if errorlevel 1 (
+    echo Erro: Falha ao executar a aplicacao.
+    pause
+    exit /b 1
+)
 
-echo.
-pause
 endlocal
