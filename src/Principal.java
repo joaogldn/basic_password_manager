@@ -1,49 +1,47 @@
 import java.util.Scanner;
 
 public class Principal {
-    public static void main(String[] args) throws Exception {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) {
         GerenciadorSenhas gerenciador = new GerenciadorSenhas();
-        Autenticador autenticador = new Autenticador();
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Código 2FA enviado: " + autenticador.enviarCodigo2FA());
-
-        System.out.print("Digite o código 2FA: ");
-        String codigo = scanner.nextLine();
-        if (!autenticador.verificarCodigo(codigo)) {
-            System.out.println("Autenticação falhou.");
-            return;
-        }
+        System.out.println("=== Gerenciador de Senhas Seguro ===");
 
         while (true) {
-            System.out.println("\n1. Adicionar senha\n2. Listar senhas\n3. Verificar vazamento\n4. Gerar senha forte\n5. Sair");
-            String escolha = scanner.nextLine();
-            switch (escolha) {
+            System.out.println("\nEscolha uma opção:");
+            System.out.println("1 - Cadastrar nova senha");
+            System.out.println("2 - Listar senhas cadastradas");
+            System.out.println("0 - Sair");
+            System.out.print("Opção: ");
+
+            String opcao = scanner.nextLine();
+
+            switch (opcao) {
                 case "1":
-                    System.out.print("Serviço: ");
+                    System.out.print("Digite o nome do serviço: ");
                     String servico = scanner.nextLine();
-                    System.out.print("Usuário: ");
+
+                    System.out.print("Digite o nome do usuário: ");
                     String usuario = scanner.nextLine();
-                    System.out.print("Senha: ");
+
+                    System.out.print("Digite a senha: ");
                     String senha = scanner.nextLine();
-                    gerenciador.adicionarCredencial(servico, usuario, senha);
+
+                    gerenciador.cadastrarSenha(servico, usuario, senha);
                     break;
+
                 case "2":
-                    gerenciador.listarCredenciais();
+                    gerenciador.listarSenhas();
                     break;
-                case "3":
-                    System.out.print("Senha para verificar: ");
-                    String senhaVerificar = scanner.nextLine();
-                    VerificadorViolacao.verificarSenha(senhaVerificar);
-                    break;
-                case "4":
-                    System.out.println("Senha sugerida: " + GeradorSenhas.gerarSenhaForte(12));
-                    break;
-                case "5":
+
+                case "0":
+                    System.out.println("Saindo...");
                     scanner.close();
-                    return;
+                    System.exit(0);
+                    break;
+
                 default:
-                    System.out.println("Opção inválida");
+                    System.out.println("Opção inválida. Tente novamente.");
             }
         }
     }
