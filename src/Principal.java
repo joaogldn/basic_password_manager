@@ -1,54 +1,73 @@
+import java.util.List;
 import java.util.Scanner;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Principal {
     public static void main(String[] args) {
-        GerenciadorSenhas gerenciador = new GerenciadorSenhas();
         Scanner scanner = new Scanner(System.in);
+        GerenciadorSenhas gerenciador = new GerenciadorSenhas();
 
-        System.out.println("=== Gerenciador de Senhas Seguro ===");
+        while (true) {
+            System.out.println("Escolha uma opção:");
+            System.out.println("1 - Cadastrar nova senha");
+            System.out.println("2 - Listar senhas cadastradas");
+            System.out.println("0 - Sair");
+            System.out.print("Opção: ");
+            String escolha = scanner.nextLine();
 
-        try {
-            while (true) {
-                System.out.println("\nEscolha uma opção:");
-                System.out.println("1 - Cadastrar nova senha");
-                System.out.println("2 - Listar senhas cadastradas");
-                System.out.println("0 - Sair");
-                System.out.print("Opção: ");
+            switch (escolha) {
+                case "1":
+                    System.out.print("Informe o nome do serviço: ");
+                    String servico = scanner.nextLine().trim();
 
-                String opcao = scanner.nextLine();
+                    System.out.print("Informe o email: ");
+                    String email = scanner.nextLine().trim();
 
-                switch (opcao) {
-                    case "1":
-                        System.out.print("Digite o nome do serviço: ");
-                        String servico = scanner.nextLine();
+                    System.out.print("Deseja gerar uma senha segura automaticamente? (s/n): ");
+                    String opcao = scanner.nextLine().trim().toLowerCase();
+                    String senha;
 
-                        System.out.print("Digite o nome do usuário: ");
-                        String usuario = scanner.nextLine();
+                    if (opcao.equals("s")) {
+                        senha = GeradorSenha.gerarSenhaForte();
+                        System.out.println("Senha gerada: " + senha);
+                    } else {
+                        System.out.print("Informe a senha: ");
+                        senha = scanner.nextLine().trim();
+                    }
 
-                        System.out.print("Digite a senha: ");
-                        String senha = scanner.nextLine();
+                    if (VerificadorViolacao.verificarVazamento(senha)) {
+                        System.out.println("⚠️ Atenção: Esta senha já apareceu em vazamentos anteriores!");
+                    }
 
-                        gerenciador.cadastrarSenha(servico, usuario, senha);
-                        break;
+                    String senhaCriptografada = BCrypt.hashpw(senha, BCrypt.gensalt());
+                    gerenciador.adicionarSenha(new Senha(servico, email, senhaCriptografada));
+                    System.out.println("✅ Senha cadastrada com sucesso!");
+                    break;
 
-                    case "2":
-                        gerenciador.listarSenhas();
-                        break;
+                case "2":
+                    List<Senha> senhas = gerenciador.listarSenhas();
+                    if (senhas.isEmpty()) {
+                        System.out.println("Nenhuma senha cadastrada.");
+                    } else {
+                        for (Senha s : senhas) {
+                            System.out.println("🔐 Serviço: " + s.getServico());
+                            System.out.println("📧 Email: " + s.getEmail());
+                            System.out.println("Senha (criptografada): " + s.getSenhaCriptografada());
+                            System.out.println("-----------------------------");
+                        }
+                    }
+                    break;
 
-                    case "0":
-                        System.out.println("Saindo...");
-                        scanner.close();
-                        System.exit(0);
-                        break;
+                case "0":
+                    System.out.println("Saindo...");
+                    scanner.close();
+                    System.exit(0);
+                    break;
 
-                    default:
-                        System.out.println("Opção inválida. Tente novamente.");
-                }
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
             }
-        } catch (Exception e) {
-            System.out.println("Erro inesperado: " + e.getMessage());
-        } finally {
-            scanner.close();
         }
     }
 }
