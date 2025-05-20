@@ -16,8 +16,19 @@ public class GerenciadorSenhas {
 
     private Map<String, Credencial> carregarSenhas() {
         try (Reader reader = new FileReader(ARQUIVO_SENHAS)) {
-            return gson.fromJson(reader, new TypeToken<Map<String, Credencial>>(){}.getType());
+            Map<String, Credencial> dados = gson.fromJson(reader, new TypeToken<Map<String, Credencial>>(){}.getType());
+            if (dados == null) {
+                return new HashMap<>();
+            }
+            return dados;
+        } catch (FileNotFoundException e) {
+            // Arquivo não existe ainda - retorna mapa vazio
+            return new HashMap<>();
         } catch (IOException e) {
+            System.out.println("Erro ao ler arquivo de senhas: " + e.getMessage());
+            return new HashMap<>();
+        } catch (JsonSyntaxException e) {
+            System.out.println("Erro no formato do arquivo de senhas. O arquivo pode estar corrompido.");
             return new HashMap<>();
         }
     }
@@ -26,7 +37,7 @@ public class GerenciadorSenhas {
         try (Writer writer = new FileWriter(ARQUIVO_SENHAS)) {
             gson.toJson(senhas, writer);
         } catch (IOException e) {
-            System.out.println("Erro ao salvar as senhas.");
+            System.out.println("Erro ao salvar as senhas: " + e.getMessage());
         }
     }
 
@@ -44,21 +55,23 @@ public class GerenciadorSenhas {
             System.out.println("Erro: A senha deve ter pelo menos 8 caracteres.");
             return;
         }
-
-        
         if (!senha.matches("[\\w!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+")) {
             System.out.println("Erro: A senha contém caracteres inválidos.");
             return;
         }
 
-        // Hash da senha
-        String hash = BCrypt.hashpw(senha, BCrypt.gensalt());
+        try {
+            // Hash da senha
+            String hash = BCrypt.hashpw(senha, BCrypt.gensalt());
 
-        // Cria credencial e salva
-        Credencial cred = new Credencial(usuario, hash);
-        senhas.put(servico, cred);
-        salvarSenhas();
-        System.out.println("Senha cadastrada com sucesso para o serviço: " + servico);
+            // Cria credencial e salva
+            Credencial cred = new Credencial(usuario, hash);
+            senhas.put(servico, cred);
+            salvarSenhas();
+            System.out.println("Senha cadastrada com sucesso para o serviço: " + servico);
+        } catch (Exception e) {
+            System.out.println("Erro inesperado ao cadastrar a senha: " + e.getMessage());
+        }
     }
 
     public void listarSenhas() {
